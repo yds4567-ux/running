@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+<title>8월 러닝 마일리지</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root {
+    --bg: #12151a;
+    --surface: #1b2027;
+    --surface-2: #232a33;
+    --line: #313a44;
+    --accent: #d7ff3f;
+    --accent-2: #ff5b35;
+    --text: #f2f3ef;
+    --muted: #8b95a1;
+    --radius: 14px;
+    --font-display: 'Bebas Neue', sans-serif;
+    --font-body: 'Inter', -apple-system, sans-serif;
+    --font-mono: 'IBM Plex Mono', monospace;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    background-image: repeating-linear-gradient(180deg, transparent 0 39px, rgba(255,255,255,0.025) 39px 40px);
+    color: var(--text);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    padding-bottom: 40px;
+  }
+  .page { max-width: 460px; margin: 0 auto; padding: 0 18px; }
+  header.hero { padding: 32px 0 20px; border-bottom: 1px solid var(--line); margin-bottom: 22px; }
+  .eyebrow { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.18em; color: var(--accent); margin-bottom: 6px; }
+  h1 { font-family: var(--font-display); font-size: 44px; letter-spacing: 0.01em; margin: 0 0 4px; line-height: 1; }
+  .sub { color: var(--muted); font-size: 13.5px; margin: 0; }
+  section { margin-bottom: 26px; }
+  h2 { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin: 0 0 12px; font-weight: 600; }
+  .match-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 16px 14px; margin-bottom: 12px; }
+  .match-top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; }
+  .match-label { font-family: var(--font-mono); font-size: 11px; color: var(--muted); letter-spacing: 0.08em; }
+  .match-odds { font-family: var(--font-mono); font-size: 11px; color: var(--accent-2); background: rgba(255,91,53,0.12); padding: 2px 8px; border-radius: 20px; }
+  .lane-row { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 6px; }
+  .team-name { font-size: 14.5px; font-weight: 600; }
+  .team-name .tag { font-family: var(--font-mono); font-size: 10.5px; color: var(--accent-2); font-weight: 500; margin-left: 4px; }
+  .team-km { font-family: var(--font-mono); font-size: 17px; font-weight: 600; }
+  .team-km .unit { font-size: 11px; color: var(--muted); margin-left: 2px; }
+  .track { position: relative; height: 10px; background: var(--surface-2); border-radius: 6px; overflow: hidden; margin: 10px 0 4px; }
+  .track-fill { position: absolute; top: 0; left: 0; bottom: 0; border-radius: 6px; background: var(--accent); width: 0%; transition: width 0.5s ease; }
+  .track-fill.b { background: var(--accent-2); }
+  .lane-second .team-km { color: var(--accent-2); }
+  .rank-list { list-style: none; margin: 0; padding: 0; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+  .rank-list li { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+  .rank-list li:last-child { border-bottom: none; }
+  .rank-num { font-family: var(--font-display); font-size: 22px; color: var(--muted); width: 22px; }
+  .rank-list li:first-child .rank-num { color: var(--accent); }
+  .rank-name { flex: 1; font-size: 14.5px; font-weight: 500; }
+  .rank-val { font-family: var(--font-mono); font-size: 14px; color: var(--muted); }
+  .input-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; }
+  .field-row { display: flex; gap: 8px; margin-bottom: 10px; }
+  .field-row:last-of-type { margin-bottom: 0; }
+  select, input[type=number] {
+    flex: 1; min-width: 0; background: var(--surface-2); border: 1px solid var(--line); color: var(--text);
+    font-family: var(--font-body); font-size: 15px; padding: 12px 10px; border-radius: 9px;
+    -webkit-appearance: none; appearance: none;
+  }
+  select:focus, input:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+  button[type=submit] {
+    background: var(--accent); color: #12151a; border: none; font-family: var(--font-body); font-weight: 700;
+    font-size: 15px; padding: 12px 18px; border-radius: 9px; cursor: pointer; white-space: nowrap;
+  }
+  button[type=submit]:active { transform: scale(0.98); }
+  button[type=submit]:disabled { opacity: 0.5; cursor: default; }
+  .status-msg { font-size: 12.5px; color: var(--muted); margin: 10px 2px 0; min-height: 16px; }
+  .status-msg.ok { color: var(--accent); }
+  .status-msg.err { color: var(--accent-2); }
+  .feed-list { list-style: none; margin: 0; padding: 0; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+  .feed-list li { display: flex; align-items: center; gap: 10px; padding: 11px 16px; border-bottom: 1px solid var(--line); font-size: 13.5px; }
+  .feed-list li:last-child { border-bottom: none; }
+  .feed-date { font-family: var(--font-mono); font-size: 11.5px; color: var(--muted); width: 40px; flex-shrink: 0; }
+  .feed-name { font-weight: 600; flex: 1; }
+  .feed-km { font-family: var(--font-mono); color: var(--accent); }
+  .feed-del { background: none; border: none; color: var(--muted); font-size: 12px; cursor: pointer; padding: 4px 6px; flex-shrink: 0; }
+  .feed-del:hover { color: var(--accent-2); }
+  .feed-empty { padding: 18px 16px; color: var(--muted); font-size: 13.5px; text-align: center; }
+  .footnote { text-align: center; color: var(--muted); font-size: 11.5px; font-family: var(--font-mono); margin-top: 30px; line-height: 1.6; }
+  .setup-warning {
+    background: rgba(255,91,53,0.12); border: 1px solid var(--accent-2); border-radius: var(--radius);
+    padding: 14px 16px; font-size: 13px; line-height: 1.6; margin-bottom: 20px; color: var(--text);
+  }
+  .setup-warning code { background: var(--surface-2); padding: 1px 5px; border-radius: 4px; font-family: var(--font-mono); font-size: 12px; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="hero">
+    <div class="eyebrow">AUGUST RUN LOG · 2026</div>
+    <h1>8월 러닝 마일리지</h1>
+    <p class="sub">팀 대항전 — 뛴 만큼 여기에 기록하세요</p>
+  </header>
+
+  <div id="setup-warning" class="setup-warning" style="display:none;">
+    ⚠️ 아직 Supabase 연결이 안 됐어요. 이 HTML 파일 맨 아래 스크립트에서
+    <code>SUPABASE_URL</code>과 <code>SUPABASE_ANON_KEY</code> 값을
+    본인 Supabase 프로젝트 값으로 바꿔주세요.
+  </div>
+
+  <section>
+    <h2>대결 현황</h2>
+
+    <div class="match-card">
+      <div class="match-top">
+        <span class="match-label">매치 1</span>
+        <span class="match-odds">동현+상현 × 1.7</span>
+      </div>
+      <div class="lane-row">
+        <span class="team-name">재성+재민</span>
+        <span class="team-km"><span id="m1a-km">0.00</span><span class="unit">km</span></span>
+      </div>
+      <div class="track"><div class="track-fill a" id="m1a-fill"></div></div>
+
+      <div class="lane-row lane-second">
+        <span class="team-name">동현+상현 <span class="tag">환산</span></span>
+        <span class="team-km"><span id="m1b-km">0.00</span><span class="unit">km</span></span>
+      </div>
+      <div class="track"><div class="track-fill b" id="m1b-fill"></div></div>
+    </div>
+
+    <div class="match-card">
+      <div class="match-top">
+        <span class="match-label">매치 2</span>
+        <span class="match-odds">규태 × 1.8</span>
+      </div>
+      <div class="lane-row">
+        <span class="team-name">성용</span>
+        <span class="team-km"><span id="m2a-km">0.00</span><span class="unit">km</span></span>
+      </div>
+      <div class="track"><div class="track-fill a" id="m2a-fill"></div></div>
+
+      <div class="lane-row lane-second">
+        <span class="team-name">규태 <span class="tag">환산</span></span>
+        <span class="team-km"><span id="m2b-km">0.00</span><span class="unit">km</span></span>
+      </div>
+      <div class="track"><div class="track-fill b" id="m2b-fill"></div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>순위 (환산 기준)</h2>
+    <ol class="rank-list" id="rank-list"></ol>
+  </section>
+
+  <section>
+    <h2>기록하기</h2>
+    <div class="input-card">
+      <form id="log-form">
+        <div class="field-row">
+          <select id="name-select" required></select>
+          <select id="date-select" required></select>
+        </div>
+        <div class="field-row">
+          <input type="number" id="km-input" step="0.01" min="0.01" placeholder="km 입력" required />
+          <button type="submit" id="submit-btn">기록하기</button>
+        </div>
+      </form>
+      <p class="status-msg" id="status-msg"></p>
+    </div>
+  </section>
+
+  <section>
+    <h2>최근 기록</h2>
+    <ul class="feed-list" id="feed-list">
+      <li class="feed-empty">불러오는 중…</li>
+    </ul>
+  </section>
+
+  <p class="footnote">누구나 이 페이지에서 바로 입력 가능 · 로그인/앱 설치 불필요<br>기록은 자동으로 모두에게 공유됩니다</p>
+
+</div>
+
+<script>
+(function () {
+  // =========================================================
+  // ↓↓↓ 여기 두 줄만 본인 Supabase 프로젝트 값으로 바꿔주세요 ↓↓↓
+  var SUPABASE_URL = 'https://heufofnxumrdgokgayvj.supabase.co';
+  var SUPABASE_ANON_KEY = 'sb_publishable_Nd4oFnQbXdg3jksiSjPHGA_dVfQzKCT';
+  // ↑↑↑ Settings → API 에서 복사한 값 ↑↑↑
+  // =========================================================
+
+  var MEMBERS = ['재성', '재민', '상현', '동현', '성용', '규태'];
+  var TEAM_A = ['재성', '재민'];
+  var TEAM_B = ['상현', '동현'];
+  var TEAM_B_ODDS = 1.7;
+  var TEAM_C = ['성용'];
+  var TEAM_D = ['규태'];
+  var TEAM_D_ODDS = 1.8;
+
+  if (SUPABASE_URL === 'YOUR_SUPABASE_URL' || SUPABASE_ANON_KEY === 'YOUR_SUPABASE_ANON_KEY') {
+    document.getElementById('setup-warning').style.display = 'block';
+  }
+
+  var supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  var nameSelect = document.getElementById('name-select');
+  var dateSelect = document.getElementById('date-select');
+  var kmInput = document.getElementById('km-input');
+  var form = document.getElementById('log-form');
+  var submitBtn = document.getElementById('submit-btn');
+  var statusMsg = document.getElementById('status-msg');
+  var feedList = document.getElementById('feed-list');
+  var rankList = document.getElementById('rank-list');
+
+  MEMBERS.forEach(function (m) {
+    var opt = document.createElement('option');
+    opt.value = m; opt.textContent = m;
+    nameSelect.appendChild(opt);
+  });
+
+  var today = new Date();
+  var isAugust2026 = (today.getFullYear() === 2026 && today.getMonth() === 7);
+  var defaultDay = isAugust2026 ? today.getDate() : 1;
+  for (var d = 1; d <= 31; d++) {
+    var opt = document.createElement('option');
+    opt.value = '8/' + d;
+    opt.textContent = '8월 ' + d + '일';
+    if (d === defaultDay) opt.selected = true;
+    dateSelect.appendChild(opt);
+  }
+
+  function sumFor(entries, names) {
+    var total = 0;
+    entries.forEach(function (e) {
+      if (names.indexOf(e.name) !== -1) total += (parseFloat(e.km) || 0);
+    });
+    return total;
+  }
+
+  function fmt(n) { return n.toFixed(2); }
+
+  async function loadEntries() {
+    var res = await supabaseClient.from('entries').select('*').order('created_at', { ascending: false });
+    if (res.error) {
+      console.error(res.error);
+      return [];
+    }
+    return res.data || [];
+  }
+
+  function render(entries) {
+    var aTotal = sumFor(entries, TEAM_A);
+    var bRaw = sumFor(entries, TEAM_B);
+    var bTotal = bRaw * TEAM_B_ODDS;
+    var cTotal = sumFor(entries, TEAM_C);
+    var dRaw = sumFor(entries, TEAM_D);
+    var dTotal = dRaw * TEAM_D_ODDS;
+
+    document.getElementById('m1a-km').textContent = fmt(aTotal);
+    document.getElementById('m1b-km').textContent = fmt(bTotal);
+    document.getElementById('m2a-km').textContent = fmt(cTotal);
+    document.getElementById('m2b-km').textContent = fmt(dTotal);
+
+    var m1max = Math.max(aTotal, bTotal, 0.01);
+    var m2max = Math.max(cTotal, dTotal, 0.01);
+    document.getElementById('m1a-fill').style.width = (aTotal / m1max * 100) + '%';
+    document.getElementById('m1b-fill').style.width = (bTotal / m1max * 100) + '%';
+    document.getElementById('m2a-fill').style.width = (cTotal / m2max * 100) + '%';
+    document.getElementById('m2b-fill').style.width = (dTotal / m2max * 100) + '%';
+
+    var ranking = [
+      { name: '재성+재민', val: aTotal },
+      { name: '동현+상현', val: bTotal },
+      { name: '성용', val: cTotal },
+      { name: '규태', val: dTotal }
+    ].sort(function (x, y) { return y.val - x.val; });
+
+    rankList.innerHTML = '';
+    ranking.forEach(function (r, i) {
+      var li = document.createElement('li');
+      li.innerHTML =
+        '<span class="rank-num">' + (i + 1) + '</span>' +
+        '<span class="rank-name">' + r.name + '</span>' +
+        '<span class="rank-val">' + fmt(r.val) + ' km</span>';
+      rankList.appendChild(li);
+    });
+
+    feedList.innerHTML = '';
+    if (entries.length === 0) {
+      feedList.innerHTML = '<li class="feed-empty">아직 기록이 없어요. 첫 기록을 남겨보세요!</li>';
+    } else {
+      entries.slice(0, 30).forEach(function (e) {
+        var li = document.createElement('li');
+        var dateLabel = document.createElement('span');
+        dateLabel.className = 'feed-date';
+        dateLabel.textContent = e.date;
+        var nameLabel = document.createElement('span');
+        nameLabel.className = 'feed-name';
+        nameLabel.textContent = e.name;
+        var kmLabel = document.createElement('span');
+        kmLabel.className = 'feed-km';
+        kmLabel.textContent = fmt(parseFloat(e.km) || 0) + 'km';
+        var delBtn = document.createElement('button');
+        delBtn.className = 'feed-del';
+        delBtn.type = 'button';
+        delBtn.textContent = '삭제';
+        delBtn.addEventListener('click', function () { deleteEntry(e.id); });
+        li.appendChild(dateLabel);
+        li.appendChild(nameLabel);
+        li.appendChild(kmLabel);
+        li.appendChild(delBtn);
+        feedList.appendChild(li);
+      });
+    }
+  }
+
+  async function refresh() {
+    var entries = await loadEntries();
+    render(entries);
+  }
+
+  async function deleteEntry(id) {
+    await supabaseClient.from('entries').delete().eq('id', id);
+    refresh();
+  }
+
+  form.addEventListener('submit', async function (ev) {
+    ev.preventDefault();
+    var name = nameSelect.value;
+    var date = dateSelect.value;
+    var km = parseFloat(kmInput.value);
+
+    if (!name || !date || !km || km <= 0) {
+      statusMsg.textContent = '이름, 날짜, km을 정확히 입력해주세요.';
+      statusMsg.className = 'status-msg err';
+      return;
+    }
+
+    submitBtn.disabled = true;
+    statusMsg.textContent = '저장 중…';
+    statusMsg.className = 'status-msg';
+
+    var res = await supabaseClient.from('entries').insert({ name: name, date: date, km: km });
+    submitBtn.disabled = false;
+
+    if (!res.error) {
+      statusMsg.textContent = name + ' · ' + date + ' · ' + km + 'km 기록 완료!';
+      statusMsg.className = 'status-msg ok';
+      kmInput.value = '';
+      refresh();
+    } else {
+      statusMsg.textContent = '저장에 실패했어요: ' + res.error.message;
+      statusMsg.className = 'status-msg err';
+      console.error(res.error);
+    }
+  });
+
+  // initial load
+  refresh();
+
+  // real-time updates: instantly reflect other people's entries
+  try {
+    supabaseClient
+      .channel('entries-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'entries' }, refresh)
+      .subscribe();
+  } catch (e) {
+    console.warn('realtime subscribe failed, falling back to polling only', e);
+  }
+
+  // polling fallback every 10s, in case realtime isn't enabled on the table
+  setInterval(refresh, 10000);
+  document.addEventListener('visibilitychange', function () {
+    if (!document.hidden) refresh();
+  });
+})();
+</script>
+</body>
+</html>
